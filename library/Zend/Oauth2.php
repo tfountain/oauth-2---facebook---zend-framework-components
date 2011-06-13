@@ -188,11 +188,11 @@ class Zend_Oauth2
         $rights = $this->getRequestedRights();
 
         $key = array_search($right, $rights);
-        
-        if ($key !== false) { 
+
+        if ($key !== false) {
             unset($rights[$key]);
         }
-        
+
         $this->setRequestedRights($rights);
 
     }
@@ -254,11 +254,11 @@ class Zend_Oauth2
     {
         self::$httpClient = null;
     }
-    
+
     /**
      *
      * requests an access token from the authorization server
-     * 
+     *
      * The client obtains an access token from the authorization server by
      * making an HTTP "POST" request to the token endpoint. The client
      * constructs a request URI by adding the following parameters to the
@@ -276,7 +276,7 @@ class Zend_Oauth2
      *
      * - secret_type OPTIONAL (The access token secret type. If omitted, the authorization
      * server will issue a bearer token (an access token without a matching secret))
-     * 
+     *
      * @param string $verificationCode
      * @return string
      */
@@ -338,24 +338,21 @@ class Zend_Oauth2
         //exit;
 
         if ($status != '200') {
-
             $errorArray = Zend_Json::decode($body);
             require_once 'Zend/Oauth2/Exception.php';
             throw new Zend_Oauth2_Exception('we recieved an error ('.$status.') as response: '.$errorArray['error']['type'].' => '.$errorArray['error']['message']);
-
         }
 
-        $explodedBody = explode('=', $body);
+        // extract variables from the response
+        unset($access_token);
+        parse_str($body);
 
-        if ($explodedBody[0] != 'access_token') {
-
+        if (!isset($access_token)) {
             require_once 'Zend/Oauth2/Exception.php';
-            throw new Zend_Oauth2_Exception('WTF?');
-
+            throw new Zend_Oauth2_Exception('Unable to extract access token from the OAuth response');
         }
-        
-        return $explodedBody[1];
-        
+
+        return $access_token;
     }
 
 }
